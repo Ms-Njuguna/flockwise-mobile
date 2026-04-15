@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { useContext } from "react";
 import { FarmContext } from "../context/FarmContext";
+import { createRecord } from "../api/records";
 
 export default function RecordScreen() {
   const [eggs, setEggs] = useState("");
@@ -44,47 +45,37 @@ export default function RecordScreen() {
     return insights;
   };
 
-  const calculateProfit = () => {
+  const calculateProfit = async () => {
     const totalEggs = parseInt(eggs);
     const eggPrice = parseFloat(price);
     const cost = parseFloat(feedCost);
 
     if (isNaN(totalEggs) || isNaN(eggPrice) || isNaN(cost)) {
-      alert("Please enter valid numbers in all fields");
+      alert("Please enter valid numbers");
       return;
     }
 
     const income = totalEggs * eggPrice;
     const profit = income - cost;
 
-    const insights = generateInsights(
-      totalEggs,
-      cost,
-      income,
-      profit,
-      flock // 🔥 IMPORTANT
-    );
+    const insights = generateInsights(totalEggs, cost, income, profit, flock);
 
     let status =
       profit < 0 ? "❌ Loss" : profit === 0 ? "⚖️ Break-even" : "✅ Profit";
 
-    // ✅ SAVE RESULT (YOU MISSED THIS)
+    // 🔥 SEND TO BACKEND
+    await createRecord({
+      eggs: totalEggs,
+      income,
+      profit,
+    });
+
     setResult({
       income: income.toFixed(0),
       profit: profit.toFixed(0),
       status,
       insights,
     });
-
-    // ✅ SAVE RECORD
-    setRecords([
-      ...records,
-      {
-        eggs: totalEggs,
-        income,
-        profit,
-      },
-    ]);
   };
 
   return (
