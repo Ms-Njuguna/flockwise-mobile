@@ -16,27 +16,33 @@ export default function RecordScreen() {
   const [price, setPrice] = useState("");
   const [feedCost, setFeedCost] = useState("");
   const [result, setResult] = useState(null);
-  const { records, setRecords } = useContext(FarmContext);
+  const { records, setRecords, flock } = useContext(FarmContext);
 
   const generateInsights = (eggs, feedCost, income, profit, flock) => {
     let insights = [];
 
-  const expectedEggs = flock.layers * 0.7;
+    const costPerEgg = eggs > 0 ? feedCost / eggs : 0;
 
-  if (eggs < expectedEggs) {
-    insights.push("⚠️ Egg production below expected — check feed & lighting");
-  }
+    const expectedEggs = flock.layers * 0.7;
 
-  if (profit < 0) {
-    insights.push("❌ You are making a loss — reduce feed cost or increase eggs");
-  }
+    if (eggs < expectedEggs) {
+      insights.push("⚠️ Egg production below expected — check feed & lighting");
+    }
 
-  if (flock.layers > 0 && eggs / flock.layers < 0.5) {
-    insights.push("🐔 Some hens may not be laying — consider selling");
-  }
+    if (profit < 0) {
+      insights.push("❌ You are making a loss — reduce feed cost or increase eggs");
+    }
 
-  return insights;
-};
+    if (flock.layers > 0 && eggs / flock.layers < 0.5) {
+      insights.push("🐔 Some hens may not be laying — consider selling");
+    }
+
+    if (costPerEgg > 20) {
+      insights.push("⚠️ Feed cost per egg is too high");
+    }
+
+    return insights;
+  };
 
   const calculateProfit = () => {
     const totalEggs = parseInt(eggs);
@@ -44,16 +50,33 @@ export default function RecordScreen() {
     const cost = parseFloat(feedCost);
 
     if (isNaN(totalEggs) || isNaN(eggPrice) || isNaN(cost)) {
-        alert("Please enter valid numbers in all fields");
-        return;
+      alert("Please enter valid numbers in all fields");
+      return;
     }
 
     const income = totalEggs * eggPrice;
     const profit = income - cost;
-    const insights = generateInsights(totalEggs, cost, income, profit);
 
-    let status = profit < 0 ? "❌ Loss" : profit === 0 ? "⚖️ Break-even" : "✅ Profit";
+    const insights = generateInsights(
+      totalEggs,
+      cost,
+      income,
+      profit,
+      flock // 🔥 IMPORTANT
+    );
 
+    let status =
+      profit < 0 ? "❌ Loss" : profit === 0 ? "⚖️ Break-even" : "✅ Profit";
+
+    // ✅ SAVE RESULT (YOU MISSED THIS)
+    setResult({
+      income: income.toFixed(0),
+      profit: profit.toFixed(0),
+      status,
+      insights,
+    });
+
+    // ✅ SAVE RECORD
     setRecords([
       ...records,
       {

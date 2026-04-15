@@ -18,7 +18,7 @@ export default function FeedScreen() {
     const num = parseInt(birds);
     const cost = parseFloat(costPerKg);
 
-    if (!num || !cost || !group) return;
+    if (isNaN(num) || isNaN(cost) || !group) return;
 
     const feedPerBird = getFeedPerBird();
     const totalFeed = num * feedPerBird;

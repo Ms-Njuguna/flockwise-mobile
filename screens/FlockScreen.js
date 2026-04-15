@@ -10,7 +10,7 @@ export default function FlockScreen() {
   const updateFlock = () => {
     setFlock({
       ...flock,
-      layers: parseInt(layers),
+      layers: parseInt(layers) || 0,
     });
   };
 
