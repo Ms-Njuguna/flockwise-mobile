@@ -18,16 +18,25 @@ export default function RecordScreen() {
   const [result, setResult] = useState(null);
   const { records, setRecords } = useContext(FarmContext);
 
-  const generateInsights = (numEggs, cost, income, profit) => {
+  const generateInsights = (eggs, feedCost, income, profit, flock) => {
     let insights = [];
-    const costPerEgg = numEggs > 0 ? cost / numEggs : 0;
 
-    if (profit < 0) insights.push("❌ You are making a loss today");
-    if (costPerEgg > 20) insights.push("⚠️ Feed cost per egg is too high");
-    if (numEggs < 10) insights.push("🐔 Egg production is low — check lighting & feed");
-    
-    return insights;
-  };
+  const expectedEggs = flock.layers * 0.7;
+
+  if (eggs < expectedEggs) {
+    insights.push("⚠️ Egg production below expected — check feed & lighting");
+  }
+
+  if (profit < 0) {
+    insights.push("❌ You are making a loss — reduce feed cost or increase eggs");
+  }
+
+  if (flock.layers > 0 && eggs / flock.layers < 0.5) {
+    insights.push("🐔 Some hens may not be laying — consider selling");
+  }
+
+  return insights;
+};
 
   const calculateProfit = () => {
     const totalEggs = parseInt(eggs);
