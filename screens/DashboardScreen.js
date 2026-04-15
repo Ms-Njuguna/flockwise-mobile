@@ -1,15 +1,26 @@
 import { View, Text } from "react-native";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
+import { fetchRecords } from "../api/records";
 import { FarmContext } from "../context/FarmContext";
 
 export default function DashboardScreen() {
   const { flock, records } = useContext(FarmContext);
 
-  // 🧠 CALCULATIONS
-  const totalEggs = records.reduce((sum, r) => sum + r.eggs, 0);
-  const totalProfit = records.reduce((sum, r) => sum + r.profit, 0);
+  const [apiRecords, setApiRecords] = useState([]);
 
-  const today = records[records.length - 1] || {
+  useEffect(() => {
+    const loadData = async () => {
+      const data = await fetchRecords();
+      setApiRecords(data);
+    };
+
+    loadData();
+  }, []);
+
+  const totalEggs = apiRecords.reduce((sum, r) => sum + r.eggs, 0);
+  const totalProfit = apiRecords.reduce((sum, r) => sum + r.profit, 0);
+
+  const today = apiRecords[apiRecords.length - 1] || {
     eggs: 0,
     profit: 0,
   };
