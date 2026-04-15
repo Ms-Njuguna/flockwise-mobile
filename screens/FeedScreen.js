@@ -4,6 +4,7 @@ import { useState } from "react";
 export default function FeedScreen() {
   const [birds, setBirds] = useState("");
   const [group, setGroup] = useState("");
+  const [costPerKg, setCostPerKg] = useState("");
   const [result, setResult] = useState(null);
 
   const getFeedPerBird = () => {
@@ -15,10 +16,27 @@ export default function FeedScreen() {
 
   const calculateFeed = () => {
     const num = parseInt(birds);
-    const feedPerBird = getFeedPerBird();
-    const total = num * feedPerBird;
+    const cost = parseFloat(costPerKg);
 
-    setResult(total.toFixed(2));
+    if (!num || !cost || !group) return;
+
+    const feedPerBird = getFeedPerBird();
+    const totalFeed = num * feedPerBird;
+    const totalCost = totalFeed * cost;
+    const costPerBird = totalCost / num;
+
+    let warning = "";
+
+    if (group === "layers" && costPerBird > 10) {
+      warning = "⚠️ Feed cost too high per bird — may reduce profit";
+    }
+
+    setResult({
+      totalFeed: totalFeed.toFixed(2),
+      totalCost: totalCost.toFixed(0),
+      costPerBird: costPerBird.toFixed(2),
+      warning,
+    });
   };
 
   return (
@@ -28,41 +46,38 @@ export default function FeedScreen() {
         Feed Calculator
       </Text>
 
-      {/* SELECT GROUP */}
+      {/* GROUP SELECT */}
       <View className="flex-row justify-between mb-4">
-        <TouchableOpacity
-          onPress={() => setGroup("chicks")}
-          className={`p-3 rounded-lg ${group === "chicks" ? "bg-green-600" : "bg-white"}`}
-        >
-          <Text className={group === "chicks" ? "text-white" : ""}>
-            🐥 Chicks
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={() => setGroup("growers")}
-          className={`p-3 rounded-lg ${group === "growers" ? "bg-green-600" : "bg-white"}`}
-        >
-          <Text className={group === "growers" ? "text-white" : ""}>
-            🐔 Growers
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={() => setGroup("layers")}
-          className={`p-3 rounded-lg ${group === "layers" ? "bg-green-600" : "bg-white"}`}
-        >
-          <Text className={group === "layers" ? "text-white" : ""}>
-            🥚 Layers
-          </Text>
-        </TouchableOpacity>
+        {["chicks", "growers", "layers"].map((type) => (
+          <TouchableOpacity
+            key={type}
+            onPress={() => setGroup(type)}
+            className={`p-3 rounded-lg ${
+              group === type ? "bg-green-600" : "bg-white"
+            }`}
+          >
+            <Text className={group === type ? "text-white" : ""}>
+              {type === "chicks" && "🐥 Chicks"}
+              {type === "growers" && "🐔 Growers"}
+              {type === "layers" && "🥚 Layers"}
+            </Text>
+          </TouchableOpacity>
+        ))}
       </View>
 
-      {/* INPUT */}
+      {/* INPUTS */}
       <TextInput
-        placeholder="Enter number of birds"
+        placeholder="Number of birds"
         value={birds}
         onChangeText={setBirds}
+        keyboardType="numeric"
+        className="bg-white p-3 rounded-lg mb-3"
+      />
+
+      <TextInput
+        placeholder="Feed cost per kg (KES)"
+        value={costPerKg}
+        onChangeText={setCostPerKg}
         keyboardType="numeric"
         className="bg-white p-3 rounded-lg mb-4"
       />
@@ -72,15 +87,23 @@ export default function FeedScreen() {
         onPress={calculateFeed}
         className="bg-green-600 text-white p-3 text-center rounded-lg"
       >
-        Calculate Feed
+        Calculate
       </Text>
 
-      {/* RESULT */}
+      {/* RESULTS */}
       {result && (
         <View className="mt-4 bg-white p-4 rounded-xl">
-          <Text className="text-lg font-bold">
-            Feed needed: {result} kg/day
-          </Text>
+
+          <Text>Feed needed: {result.totalFeed} kg/day</Text>
+          <Text>Total cost: KES {result.totalCost}</Text>
+          <Text>Cost per bird: KES {result.costPerBird}</Text>
+
+          {result.warning !== "" && (
+            <Text className="text-red-500 mt-2">
+              {result.warning}
+            </Text>
+          )}
+
         </View>
       )}
 
