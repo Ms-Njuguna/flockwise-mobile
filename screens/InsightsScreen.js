@@ -10,6 +10,10 @@ export default function InsightsScreen() {
 
   const eggData = last7.map(r => r.eggs);
 
+  if (!eggData || eggData.length === 0) {
+    return <View className="p-4"><Text>No data available</Text></View>;
+  }
+
   return (
     <View className="flex-1 p-4 bg-green-50">
 

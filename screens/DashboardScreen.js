@@ -1,5 +1,5 @@
 import { View, Text } from "react-native";
-import { useContext, useEffect } from "react";
+import {useState, useContext, useEffect } from "react";
 import { fetchRecords } from "../api/records";
 import { FarmContext } from "../context/FarmContext";
 
