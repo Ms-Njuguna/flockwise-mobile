@@ -8,12 +8,15 @@ import {
   KeyboardAvoidingView, 
   Platform 
 } from "react-native";
+import { useContext } from "react";
+import { FarmContext } from "../context/FarmContext";
 
 export default function RecordScreen() {
   const [eggs, setEggs] = useState("");
   const [price, setPrice] = useState("");
   const [feedCost, setFeedCost] = useState("");
   const [result, setResult] = useState(null);
+  const { records, setRecords } = useContext(FarmContext);
 
   const generateInsights = (numEggs, cost, income, profit) => {
     let insights = [];
@@ -42,12 +45,14 @@ export default function RecordScreen() {
 
     let status = profit < 0 ? "❌ Loss" : profit === 0 ? "⚖️ Break-even" : "✅ Profit";
 
-    setResult({
-      income: income.toLocaleString(),
-      profit: profit.toLocaleString(),
-      status,
-      insights,
-    });
+    setRecords([
+      ...records,
+      {
+        eggs: totalEggs,
+        income,
+        profit,
+      },
+    ]);
   };
 
   return (
